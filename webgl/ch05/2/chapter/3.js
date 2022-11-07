@@ -11,7 +11,7 @@ var yAxis = 1;
 var zAxis = 2;
 
 var axis = 0;
-var theta = [0, 0, 0];
+var theta = [45.0, 45.0, 45.0];
 
 var thetaLoc;
 
@@ -57,17 +57,7 @@ window.onload = function initCube() {
     thetaLoc = gl.getUniformLocation(program, "theta");
     gl.uniform3fv(thetaLoc, theta);
 
-    document.getElementById("xbutton").onclick = function () {
-        axis = xAxis;
-    }
-
-    document.getElementById("ybutton").onclick = function () {
-        axis = yAxis;
-    }
-
-    document.getElementById("zbutton").onclick = function () {
-        axis = zAxis;
-    }
+   
 
     render();
 }
@@ -114,7 +104,7 @@ function makeCube() {
 function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    //theta[axis] += 0.1;
+    theta[axis] += 0.1;
     gl.uniform3fv(thetaLoc, theta);
 
     gl.drawArrays(gl.TRIANGLES, 0, points.length / 3);

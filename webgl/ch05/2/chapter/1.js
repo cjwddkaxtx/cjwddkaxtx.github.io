@@ -23,7 +23,7 @@ function generate(){
 		 0.5*scalex, -0.5*scalex, 
 	];
 	document.getElementById("scalex").onchange = function () {
-		//vertices = [];
+		vertices = [];
 	    scalex = event.target.value;
 	}
 	//scalex= document.getElementById("scalex").value;

@@ -56,11 +56,13 @@
 		     
 		    function mouseMove(event)
 		    {
+				var rect = canvas.getBoundingClientRect();
+				
 		        var e = event || window.event;
 		        var scrollx = document.documentElement.scrollLeft || document.body.scrollTop;
 		        var scrolly= document.documentElement.scrollTop || document.body.scrollTop;
 		        var x = e.pageX || e.clientX + scrollx;
-		        var y = e.pageY || e.clientY + scrolly;
+		        var y = event.clientX - rect.left;
 		        document.getElementById("x").value = x;
 		        document.getElementById("y").value = y;
 		        //console.log(x);
