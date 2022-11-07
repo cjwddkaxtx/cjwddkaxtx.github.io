@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+		<title>ch01.1</title>
+		<!-- 顶点着色器和片元着色器代码 -->
+		<script id="vertex-shader" type="x-shader/x-vertex">
+			attribute vec4 vPosition;
+			
+			
+			void main(){
+				
+				gl_Position = vPosition;
+			}
+		</script>
+		<script id="fragment-shader" type="x-shader/x-fragment">
+			precision mediump float;
+			varying vec4 fColor;
+			void main(){
+				//gl_FragColor = vec4( 1.0, 1.0, 0.0, 1.0 );	原本颜色是黄色
+				gl_FragColor = vec4( 0.0, 0.0, 1.0, 1.0 );	//现在是蓝色
+			}
+		</script>
+		<!-- 一组相关的JS库 -->
+		<script type="text/javascript" src="./chapter/webgl-utils.js"></script>
+		<script type="text/javascript" src="./chapter/initShaders.js"></script>
+		<!-- 绘制三角形的JS代码 -->
+		<script type="text/javascript" src="./chapter/1.js"></script>
+	</head>
+	<body onload="generate()">
+		<canvas id="triangle-canvas" style="border:none;" width="500" height="500"></canvas>
+		<br>
+		Scale-x&emsp;&emsp;&ensp;0.2<input type="range" id="scalex" min="0.5" max="2.0" value="1.2" step="0.1">2.0<br>
+		<button id="generate" onclick="generate()">Generate!</button><br>
+
+	</body>
+</html>

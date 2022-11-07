@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<!-- saved from url=(0052)https://cjwddkaxtx.github.io/webgl/ch04/1/index.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	
+        <title></title>
+        <script id="vertex-shader" type="x-shader/x-vertex">
+        #define pi 3.1415926
+
+        attribute vec4 vPosition;
+        attribute float aAngle;
+		uniform float theta;
+
+        void main(){
+            float x = cos( aAngle * pi / 180.0 );
+            float y = sin( aAngle * pi / 180.0 );
+			gl_Position = vec4( x * cos(theta) - y * sin(theta), x * sin(theta) + y * cos(theta), 0.0, 1.0 );
+
+        }
+        </script>
+        <script id="fragment-shader" type="x-shader/x-fragment">
+            precision mediump float;
+            varying vec4 fColor;
+            
+            void main(){
+                gl_FragColor = vec4( 1, 0, 0, 1.0 );
+            }
+        </script>
+        <script type="text/javascript" src="./chapter/webgl-utils.js"></script>
+        <script type="text/javascript" src="./chapter/initShaders.js"></script>
+        <script type="text/javascript" src="./chapter/graphic.js"></script>
+    </head>
+    <body>
+        <canvas id="gl-canvas" style="border:none;" width="500" height="500"></canvas>
+		<fieldset>
+			<legend>转动控制</legend>
+			Number of triangles 15<input type="range" id="n" min="15" max="50" value="27" step="1">50
+			<br>
+			speed       &nbsp;0<input type="range" id="speed" min="0" max="100" value="0" step="10">100
+			<br>
+			<br>
+			<button id="direction" onclick="changeDir()">换个转动方向</button>
+		</fieldset>
+		<br>
+		
+		交互说明： Enter键可以控制转动方向
+		<br>
+		     ↑键↓键可以控制⚪的程度
+    
+</body></html>
