@@ -2,6 +2,156 @@
 
 const{ vec3, vec4, mat3, mat4 } = glMatrix;
 
+
+
+
+
+var projectionType = 1; // default is Orthographic(1), Perspective(2)
+var drawType = 1; // default is WireFrame(1), Solid(2)
+var viewType = [0]; // default is orthographic frontview(1), leftView(2), topView(3), isoview(4)
+var viewcnt = 0; // view count default = 0, in orthographic or perspective mode
+
+var changePos = 1; // default is Object(1), camera(2)
+
+
+
+function restoreSliderValue(changePos){
+    if (changePos === 1) {
+        document.getElementById("xpos").value = dx;
+        document.getElementById("ypos").value = dy;
+        document.getElementById("zpos").value = dz;
+        document.getElementById("xrot").value = Math.floor(dxt);
+        document.getElementById("yrot").value = Math.floor(dyt);
+        document.getElementById("zrot").value = Math.floor(dzt);
+    }
+    if (changePos === 2) {
+        document.getElementById("xpos").value = cx;
+        document.getElementById("ypos").value = cy;
+        document.getElementById("zpos").value = cz;
+        document.getElementById("xrot").value = Math.floor(cxt);
+        document.getElementById("yrot").value = Math.floor(cyt);
+        document.getElementById("zrot").value = Math.floor(czt);
+    }
+}
+
+function checkInput(){
+    var ptype = document.getElementById( "ortho" ).checked;
+    if( ptype ) {
+        projectionType = 1;
+    }else{
+        if( document.getElementById( "persp" ).checked )
+            projectionType = 2;
+    }
+
+    var dtype = document.getElementById( "wire" ).checked;
+    if( dtype ){
+        drawType = 1;
+    }else{
+        if( document.getElementById( "solid" ).checked )
+            drawType = 2;
+    }
+
+    var hexcolor = document.getElementById( "objcolor" ).value.substring(1);
+    var rgbHex = hexcolor.match(/.{1,2}/g);
+    currentColor = vec4.fromValues( 
+        parseInt(rgbHex[0], 16)/255.0,
+        parseInt(rgbHex[1], 16)/255.0,
+        parseInt(rgbHex[2], 16)/255.0,
+        1.0
+    );
+}
+
+
+function buildModelViewProj(){
+    /* ModelViewMatrix & ProjectionMatrix */
+    //eye = vec3.fromValues(cx, cy, cz);
+    var localRadius;
+
+    if( projectionType == 1 ){
+        mat4.ortho( pMatrix, oleft, oright, oybottom, oytop, onear, ofar );
+        localRadius = oradius;
+    }else{
+        aspect = 1;
+        mat4.perspective(pMatrix, fovy, aspect, pnear, pfar);
+        //mat4.frustum( pMatrix, pleft, pright, pybottom, pytop, pnear, pfar );
+        localRadius = pradius;
+    }
+    
+    var rthe = theta * Math.PI / 180.0;
+    var rphi = phi * Math.PI / 180.0;
+
+    vec3.set(eye, localRadius * Math.sin(rthe) * Math.cos(rphi), localRadius * Math.sin(rthe) * Math.sin(rphi), localRadius * Math.cos(rthe)); 
+
+    mat4.lookAt( mvMatrix, eye, at, up );
+
+    mat4.translate( mvMatrix, mvMatrix, vec3.fromValues( dx, dy, dz ) );
+    
+    mat4.rotateZ(mvMatrix, mvMatrix, dzt * Math.PI / 180.0);
+    mat4.rotateY(mvMatrix, mvMatrix, dyt * Math.PI / 180.0);
+    mat4.rotateX(mvMatrix, mvMatrix, dxt * Math.PI / 180.0);
+
+    //mat4.translate(mvMatrix, mvMatrix, vec3.fromValues(dx, dy, dz));
+    mat4.scale(mvMatrix, mvMatrix, vec3.fromValues(sx, sy, sz));
+
+    modelViewMatrix = gl.getUniformLocation(program, "modelViewMatrix");
+    gl.uniformMatrix4fv(modelViewMatrix, false, new Float32Array(mvMatrix));
+    projectionMatrix = gl.getUniformLocation(program, "projectionMatrix");
+    gl.uniformMatrix4fv(projectionMatrix, false, new Float32Array(pMatrix));
+}
+
+function updateModelData(){
+    if( vBuffer === null)
+        vBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, vBuffer );
+    lineIndex = [];
+    for( var i = 0; i < mesh.indices.length; i+=3 ){
+        lineIndex.push(mesh.indices[i], mesh.indices[i+1]);
+        lineIndex.push(mesh.indices[i+1], mesh.indices[i + 2]);
+        lineIndex.push(mesh.indices[i+2], mesh.indices[i]);
+    }
+    gl.bufferData( gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(lineIndex), gl.STATIC_DRAW );
+}
+
+function updateColor(){
+    var bcolor = [];
+    for (var i = 0; i < mesh.vertexBuffer.numItems; i++)
+        bcolor.push(currentColor[0], currentColor[1], currentColor[2], currentColor[3]);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(bcolor), gl.STATIC_DRAW);
+
+    vColor = gl.getAttribLocation(program, "vColor",);
+    gl.vertexAttribPointer(vColor, 4, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vColor);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function Renderer( canvasName, vertSrc, fragSrc )
 {
     var canvas;
@@ -91,7 +241,7 @@ function Renderer( canvasName, vertSrc, fragSrc )
     var materialSpecular = vec4.create();
     var materialShininess = 1.0;
 
-    var clearColor = vec4.fromValues( 0.0, 1.0, 1.0, 1.0 );
+    var clearColor = vec4.fromValues( 0.0, 0.0, 1.0, 0.0 );
 
     var materialKa = 1.0;
     var materialKd = 1.0;
@@ -110,8 +260,10 @@ function Renderer( canvasName, vertSrc, fragSrc )
         gl.enable( gl.DEPTH_TEST );
 
         initInterface();
-
+		//initInterface1();
         setupShaders();
+
+		//checkInput();
 
         initCoefficients();
     };
@@ -151,7 +303,19 @@ function Renderer( canvasName, vertSrc, fragSrc )
                 1.0
             );
         });
-
+		
+		document.getElementById("objcolor").addEventListener("input", function(event){
+		    var hexcolor = event.target.value.substring(1);
+		    var rgbHex = hexcolor.match(/.{1,2}/g);
+		    materialAmbient = vec4.fromValues(
+		        parseInt(rgbHex[0], 16) * 1.0 / 255.0,
+		        parseInt(rgbHex[1], 16) * 1.0 / 255.0,
+		        parseInt(rgbHex[2], 16) * 1.0 / 255.0,
+		        1.0
+		    );
+		});
+		
+		
         document.getElementById("kd-color").addEventListener("input", function (event) {
             var hexcolor = event.target.value.substring(1);
             var rgbHex = hexcolor.match(/.{1,2}/g);
@@ -254,8 +418,182 @@ function Renderer( canvasName, vertSrc, fragSrc )
             phi = p;
             document.getElementById("slider-phi-value").innerHTML = p;
         });
+		
+		document.getElementById("objcolor").addEventListener("input", function (event) {
+		    var hexcolor = this.value.substring(1);
+		    var rgbHex = hexcolor.match(/.{1,2}/g);
+		    currentColor = vec4.fromValues(
+		        parseInt(rgbHex[0], 16) * 1.0 / 255.0,
+		        parseInt(rgbHex[1], 16) * 1.0 / 255.0,
+		        parseInt(rgbHex[2], 16) * 1.0 / 255.0,
+		        1.0
+		    );
+		    updateColor();
+		});
+		
+		document.getElementById("xpos").addEventListener("input", function(event){
+		    if(changePos===1)
+		        dx = this.value;
+		    else if(changePos===2)
+		        cx = this.value;
+		    buildModelViewProj();
+		});
+		document.getElementById("ypos").addEventListener("input", function(event){
+		    if(changePos===1)
+		        dy = this.value;
+		    else if(changePos===2)
+		        cy = this.value;
+		    buildModelViewProj();
+		});
+		document.getElementById("zpos").addEventListener("input", function(event){
+		    if(changePos===1)
+		        dz = this.value;
+		    else if(changePos===2)
+		        cz = this.value;
+		    buildModelViewProj();
+		});
+		
+		document.getElementById("xrot").addEventListener("input", function(event){
+		    if(changePos===1)
+		        dxt = this.value;
+		    else if(changePos===2)
+		        cxt = this.value;
+		    buildModelViewProj();
+		});
+		document.getElementById("yrot").addEventListener("input", function(event){
+		    if(changePos===1)
+		        dyt = this.value;
+		    else if(changePos===2)
+		        cyt = this.value;
+		    buildModelViewProj();
+		});
+		document.getElementById("zrot").addEventListener("input",function(event){
+		    if (changePos === 1)
+		        dzt = this.value;
+		    else if (changePos === 2)
+		        czt = this.value;
+		    buildModelViewProj();
+		});
+		
+		var postypeRadio = document.getElementsByName("posgrp");
+		for (var i = 0; i < postypeRadio.length; i++) {
+		    postypeRadio[i].addEventListener("click", function (event) {
+		        var value = this.value;
+		        if (this.checked) {
+		            changePos = parseInt(value);
+		            restoreSliderValue(changePos);
+		        }
+		    });
+		}
+		
+		//document.onkeydown = handleKeyDown;
+		//document.onkeyup = handleKeyUp;
+		
+		//canvas.onmousedown = handleMouseDown;
+		//document.onmouseup = handleMouseUp;
+		//document.onmousemove = handleMouseMove;
+	}
+
+
+function initInterface1(){
+    
+
+    var projradios = document.getElementsByName("projtype");
+    for (var i = 0; i < projradios.length; i++) {
+        projradios[i].addEventListener("click", function (event) {
+            var value = this.value;
+            if (this.checked) {
+                projectionType = parseInt(value);
+            }
+            buildModelViewProj();
+        });
     }
 
+    var drawradios = document.getElementsByName("drawtype");
+    for (var i = 0; i < drawradios.length; i++) {
+        drawradios[i].onclick = function () {
+            var value = this.value;
+            if (this.checked) {
+                drawType = parseInt(value);
+            }
+            updateModelData();
+        }
+    }
+
+    document.getElementById("objcolor").addEventListener("input", function (event) {
+        var hexcolor = this.value.substring(1);
+        var rgbHex = hexcolor.match(/.{1,2}/g);
+        currentColor = vec4.fromValues(
+            parseInt(rgbHex[0], 16) * 1.0 / 255.0,
+            parseInt(rgbHex[1], 16) * 1.0 / 255.0,
+            parseInt(rgbHex[2], 16) * 1.0 / 255.0,
+            1.0
+        );
+        updateColor();
+    });
+
+    document.getElementById("xpos").addEventListener("input", function(event){
+        if(changePos===1)
+            dx = this.value;
+        else if(changePos===2)
+            cx = this.value;
+        buildModelViewProj();
+    });
+    document.getElementById("ypos").addEventListener("input", function(event){
+        if(changePos===1)
+            dy = this.value;
+        else if(changePos===2)
+            cy = this.value;
+        buildModelViewProj();
+    });
+    document.getElementById("zpos").addEventListener("input", function(event){
+        if(changePos===1)
+            dz = this.value;
+        else if(changePos===2)
+            cz = this.value;
+        buildModelViewProj();
+    });
+
+    document.getElementById("xrot").addEventListener("input", function(event){
+        if(changePos===1)
+            dxt = this.value;
+        else if(changePos===2)
+            cxt = this.value;
+        buildModelViewProj();
+    });
+    document.getElementById("yrot").addEventListener("input", function(event){
+        if(changePos===1)
+            dyt = this.value;
+        else if(changePos===2)
+            cyt = this.value;
+        buildModelViewProj();
+    });
+    document.getElementById("zrot").addEventListener("input",function(event){
+        if (changePos === 1)
+            dzt = this.value;
+        else if (changePos === 2)
+            czt = this.value;
+        buildModelViewProj();
+    });
+
+    var postypeRadio = document.getElementsByName("posgrp");
+    for (var i = 0; i < postypeRadio.length; i++) {
+        postypeRadio[i].addEventListener("click", function (event) {
+            var value = this.value;
+            if (this.checked) {
+                changePos = parseInt(value);
+                restoreSliderValue(changePos);
+            }
+        });
+    }
+
+    document.onkeydown = handleKeyDown;
+    document.onkeyup = handleKeyUp;
+
+    canvas.onmousedown = handleMouseDown;
+    document.onmouseup = handleMouseUp;
+    document.onmousemove = handleMouseMove;
+}
     function setupShaders(){
         // create shader
         vertID = gl.createShader(gl.VERTEX_SHADER);
@@ -361,6 +699,15 @@ function Renderer( canvasName, vertSrc, fragSrc )
             parseInt(ambhexcolor[2], 16) * 1.0 / 255.0,
             1.0
         );
+
+		var xambhexcolor = document.getElementById( "objcolor" ).value.substring(1).match(/.{1,2}/g);
+		materialAmbient = vec4.fromValues(
+		    parseInt(xambhexcolor[0], 16) * 1.0 / 255.0,
+		    parseInt(xambhexcolor[1], 16) * 1.0 / 255.0,
+		    parseInt(xambhexcolor[2], 16) * 1.0 / 255.0,
+		    1.0
+		);
+
 
         var difhexcolor = document.getElementById( "kd-color" ).value.substring(1).match(/.{1,2}/g);
         materialDiffuse = vec4.fromValues(

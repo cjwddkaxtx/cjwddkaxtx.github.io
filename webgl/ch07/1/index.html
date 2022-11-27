@@ -2,7 +2,7 @@
 <!-- saved from url=(0054)https://liyi1003zcmu.github.io/demos/chap6-demo-4.html -->
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta http-equiv="Content-Type" content="text/html; charet=UTF-8">
-        <title>Shading Demo for objects</title>
+        <title>ch07</title>
 
         <script type="text/javascript" src="./chapter/objloader.js"></script>
         <script type="text/javascript" src="./chapter/webgl-utils.js"></script>
@@ -106,9 +106,37 @@
             </td>
             <td><p align="left" id="debug-info"></p></td>
             </tr>
-            
-            </tbody></table><table>
-                <tbody><tr>
+            </tbody></table>
+			<div></div>
+			<table>
+				<tr>
+					<td>选择投影方式<input type="radio" id="ortho" name="projtype" value="1" checked=""><label>正交投影</label></td>
+					<td><input type="radio" id="persp" name="projtype" value="2"><label>透视投影</label>&nbsp;<label id="projtyperes"></label></td>
+				</tr>
+				<tr>
+					<td>选择绘制方式<input type="radio" id="wire" name="drawtype" value="1" checked=""><label>线框模式</label></td>
+					<td><input type="radio" id="solid" name="drawtype" value="2"><label>实体模式</label><input type="color" id="objcolor" name="objcolor" value="#ff0000"></td>
+				</tr>
+				<tr>
+					<td>改变对象位置<input type="radio" id="objpos" name="posgrp" value="1" checked=""><label>物体位置</label>&nbsp;</td>
+					<td><input type="radio" id="campos" name="posgrp" value="2"><label>相机位置</label>&nbsp;<label id="projtyperes"></label></td>
+				</tr>
+				<tr>
+					<td><label>x pos</label><input type="range" id="xpos" name="xpos" min="-5.0" max="5.0" step="0.1"> &nbsp;</td>
+					<td><label>x rot</label><input type="range" id="xrot" name="xrot" min="-360" max="360" step="1.0"></td>
+				</tr>
+				<tr>
+					<td><label>y pos</label><input type="range" id="ypos" name="ypos" min="-5.0" max="5.0" step="0.1"> &nbsp;</td>
+					<td><label>y rot</label><input type="range" id="yrot" name="yrot" min="-360" max="360" step="1.0"></td>
+				</tr>
+				<tr>
+					<td><label>z pos</label><input type="range" id="zpos" name="zpos" min="-5.0" max="5.0" step="0.1"> &nbsp;</td>
+					<td><label>z rot</label><input type="range" id="zrot" name="zrot" min="-360" max="360" step="1.0"></td>
+				</tr>
+			</table>
+			<table>
+                <tbody>
+				<tr>
                 <td align="right">Ambient reflection (ka): </td> 
                 <td id="slider-ka-value" width="30px">1.0</td> 
                 <td><input type="range" id="slider-ka" name="ka" min="0" max="1" step="0.01"></td>
@@ -125,12 +153,12 @@
                 <td align="right">Diffuse Color: </td>
                 <td><input type="color" id="kd-color" name="kdcolor" value="#ffffff"></td>
                 <td align="right" width="30px">X:</td>
-                <td id="slider-x-value" width="30px" align="center">1.1</td>
+                <td id="slider-x-value" width="30px" align="center">1</td>
                 <td width="150px"><input type="range" id="slider-x" name="xvalue" min="-10.0" max="10.0" step="0.1"></td>
                 <td align="right">Ambient Color:</td>
                 <td><input type="color" id="lt-ambient-color" name="ltamcolor" value="#ffffff"></td>
 				<td align="right" width="50px">Radius: </td>
-				<td id="slider-radius-value" width="30px" align="center">9.3</td>
+				<td id="slider-radius-value" width="30px" align="center">1.5</td>
 				<td width="150px"><input type="range" id="slider-radius" name="rvalue" min="0.1" max="30.0" step="0.1" value="3.0"></td>
 				</tr>
                 <tr>
@@ -140,27 +168,27 @@
                 <td align="right">Specular Color: </td>
                 <td><input type="color" id="ks-color" name="kscolor" value="#ffffff"></td>
                 <td align="right" width="30px">Y:</td>
-                <td id="slider-y-value" width="30px" align="center">10</td>
+                <td id="slider-y-value" width="30px" align="center">1</td>
                 <td width="150px"><input type="range" id="slider-y" name="yvalue" min="-10.0" max="10.0" step="0.1"></td>
                 <td align="right">Diffuse Color:</td>
                 <td><input type="color" id="lt-diffuse-color" name="ltdfcolor" value="#ffffff"></td>
 				<td align="right" width="50px">Theta: </td>
-				<td id="slider-theta-value" width="30px" align="center">86</td>
+				<td id="slider-theta-value" width="30px" align="center">0</td>
 				<td width="150px"><input type="range" id="slider-theta" name="tvalue" min="0" max="180" step="1" value="45"></td>
 				</tr>
                 <tr>
                 <td align="right">Shininess:</td>
-                <td id="slider-sh-value" width="30px">236</td>
+                <td id="slider-sh-value" width="30px">80</td>
                 <td><input type="range" id="slider-sh" name="sh" min="1" max="500" step="1"></td>
                 <td align="right">Background Color: </td>
-                <td><input type="color" id="bk-color" name="bkcolor" value="#00ffff"></td>
+                <td><input type="color" id="bk-color" name="bkcolor" value="#4c667f"></td>
                 <td align="right" width="30px">Z:</td>
-                <td id="slider-z-value" width="30px" align="center">4.1</td>
+                <td id="slider-z-value" width="30px" align="center">1</td>
                 <td width="150px"><input type="range" id="slider-z" name="zvalue" min="-10.0" max="10.0" step="0.1"></td>
                 <td align="right">Specular Color:</td>
                 <td><input type="color" id="lt-specular-color" name="ltspcolor" value="#ffffff"></td>
 				<td align="right" width="50px">Phi:</td>
-				<td id="slider-phi-value" width="30px" align="center">7</td>
+				<td id="slider-phi-value" width="30px" align="center">0</td>
 				<td width="150px"><input type="range" id="slider-phi" name="pvalue" min="-180" max="180" step="1" value="45"></td>
 				</tr>                
 			</tbody></table>
@@ -169,6 +197,7 @@
                 <tbody><tr style="vertical-align: top;">
                 <td><p align="center">Vertex shader: </p><br>
                 <textarea cols="50" rows="20" class="code_input_vert" id="code_vert" wrap="logical">attribute vec4 vPosition;
+
 attribute vec4 vNormal;
 
 uniform mat4 modelViewMatrix;
